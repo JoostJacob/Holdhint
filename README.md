@@ -8,21 +8,33 @@ Holdhint never plays a sound. It does not record, store, or send what you type.
 
 The project folder may still be named `toetshud`. The app itself is Holdhint.
 
-## What you need
+## Install
 
-- macOS 14 or later. It is developed on macOS 26.
-- Swift from the Xcode Command Line Tools. A full Xcode install is not required.
-- If `swift` is missing: `xcode-select --install`
+1. Download **Holdhint-x.y.z.dmg** from the [latest release](https://github.com/JoostJacob/Holdhint/releases/latest). It runs on Apple silicon and Intel Macs with macOS 14 or later.
+2. Open the DMG and drag **Holdhint** onto **Applications**.
+3. Open Holdhint from Applications. Because the app is free and not notarized by Apple, macOS blocks the first launch. Click **Done** (or **OK**), then go to **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the Holdhint message. Confirm once more. On older macOS versions you can instead right-click the app and choose **Open**.
 
-The build script compiles for the Mac you are using (Apple silicon or Intel).
+If you prefer Terminal, this removes the download flag so the app opens normally: `xattr -dr com.apple.quarantine /Applications/Holdhint.app`
 
-## Build
+A ZIP with just the app is attached to each release as well.
+
+## Build from source
+
+You need macOS 14 or later and Swift from the Xcode Command Line Tools (`xcode-select --install`). A full Xcode install is not required.
 
 ```bash
 ./scripts/make-app.sh
 ```
 
-That produces `Holdhint.app` in the project folder. The app is signed ad hoc, on this Mac, so it can be opened without a paid Apple Developer account. It is not notarized. Each person builds their own copy.
+That produces `Holdhint.app` in the project folder for the Mac you are using, signed ad hoc so it opens without a paid Apple Developer account.
+
+To build the universal DMG and ZIP for a release:
+
+```bash
+./scripts/make-release.sh
+```
+
+The files land in `dist/`.
 
 ## First launch and permissions
 
@@ -30,9 +42,9 @@ Holdhint has no Dock icon. Look for a ⌘ symbol in the menu bar.
 
 macOS will not deliver system-wide key events until you allow it. The menu shows the current state, for example `Input Monitoring: off · Accessibility: off`.
 
-1. In Finder, open the project folder. Right-click `Holdhint.app` and choose **Open**. If macOS warns that the developer cannot be verified, choose **Open** again. You can also allow it under **System Settings → Privacy & Security → Open Anyway**.
+1. Open Holdhint (see Install above for the one-time **Open Anyway** step).
 2. Apple menu → **System Settings → Privacy & Security → Input Monitoring**.
-3. Turn **Holdhint** on. If it is not in the list, click **+**, select the `Holdhint.app` you just built, and turn it on. Enable the copy you actually open. A second copy in another folder is a different app to macOS.
+3. Turn **Holdhint** on. If it is not in the list, click **+**, select `Holdhint.app` (in Applications, or the copy you built), and turn it on. Enable the copy you actually open. A second copy in another folder is a different app to macOS.
 4. For shortcuts from the front app’s menus, do the same under **Privacy & Security → Accessibility**. The built-in system list works with Input Monitoring alone. Accessibility is the extra.
 5. If a switch was already on and the panel still does not appear, turn that switch off, turn it on again, then quit Holdhint and open it again. Rebuilding the app changes its signature, and macOS then ignores the old approval until you toggle it.
 6. Quit Holdhint from its menu and open `Holdhint.app` again. Permission changes apply after a restart of the app.

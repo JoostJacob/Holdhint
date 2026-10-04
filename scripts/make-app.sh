@@ -10,15 +10,21 @@ if ! command -v swift >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Building Holdhint (release)…"
-swift build -c release
-BIN_DIR="$(swift build -c release --show-bin-path)"
+# HOLDHINT_BIN and HOLDHINT_APP let scripts/make-release.sh reuse this script
+# for a universal build without touching your local Holdhint.app.
+if [ -n "${HOLDHINT_BIN:-}" ]; then
+  BIN="$HOLDHINT_BIN"
+else
+  echo "Building Holdhint (release)…"
+  swift build -c release
+  BIN="$(swift build -c release --show-bin-path)/Holdhint"
+fi
 
-APP="$ROOT/Holdhint.app"
+APP="${HOLDHINT_APP:-$ROOT/Holdhint.app}"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-cp "$BIN_DIR/Holdhint" "$APP/Contents/MacOS/Holdhint"
+cp "$BIN" "$APP/Contents/MacOS/Holdhint"
 chmod +x "$APP/Contents/MacOS/Holdhint"
 
 # The shortcut list is copied on its own. The SwiftPM resource bundle is not a
