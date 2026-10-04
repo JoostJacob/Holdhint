@@ -60,4 +60,16 @@ public struct HoldSession: Sendable {
         phase = .showing
         return [.show(held)]
     }
+
+    /// Hide the panel, if it is up, and ignore `set` until the chord changes.
+    /// An empty set returns to idle so the next press can show the panel.
+    public mutating func suppress(holding set: ModifierSet) -> [Effect] {
+        let previous = phase
+        held = set
+        phase = set.isEmpty ? .idle : .suppressed
+        var effects: [Effect] = []
+        if previous == .waiting { effects.append(.disarmTimer) }
+        if previous == .showing { effects.append(.hide) }
+        return effects
+    }
 }

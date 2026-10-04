@@ -37,7 +37,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                          panel.canBecomeKey ? "yes" : "no"), stderr)
             return
         }
-        controller.requestPermissionsOnce()
+        showWelcomeIfNeeded()
+    }
+
+    private var welcome: WelcomeController?
+
+    private func showWelcomeIfNeeded() {
+        guard !InputMonitoringProbe.grantedInProcess() else { return }
+        let welcome = WelcomeController()
+        welcome.show()
+        self.welcome = welcome
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -122,27 +131,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func openAccessibility(_ sender: NSMenuItem) {
-        openPrivacy("Privacy_Accessibility")
+        PrivacySettings.open("Privacy_Accessibility")
     }
 
     @objc private func openInputMonitoring(_ sender: NSMenuItem) {
-        openPrivacy("Privacy_ListenEvent")
+        PrivacySettings.open("Privacy_ListenEvent")
     }
 
     @objc private func quit(_ sender: NSMenuItem) {
         NSApp.terminate(nil)
-    }
-
-    private func openPrivacy(_ anchor: String) {
-        let urls = [
-            "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?\(anchor)",
-            "x-apple.systempreferences:com.apple.preference.security?\(anchor)"
-        ]
-        for text in urls {
-            if let url = URL(string: text), NSWorkspace.shared.open(url) {
-                return
-            }
-        }
     }
 
     private func previewModifiers() -> ModifierSet? {

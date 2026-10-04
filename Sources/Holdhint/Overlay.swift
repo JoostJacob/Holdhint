@@ -74,19 +74,16 @@ final class OverlayController {
         }
     }
 
+    var isShowing: Bool { onScreen }
+
     func dismiss() {
         guard onScreen else { return }
+        // Order out immediately. The fade-out completion did not always run,
+        // and a panel that ignores clicks then had no way to leave the screen.
+        onScreen = false
         token += 1
-        let current = token
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = 0.1
-            self.panel.animator().alphaValue = 0
-        }, completionHandler: {
-            guard self.token == current else { return }
-            self.onScreen = false
-            self.panel.orderOut(nil)
-            self.panel.alphaValue = 1
-        })
+        panel.orderOut(nil)
+        panel.alphaValue = 1
     }
 
     func writePNG(to url: URL) throws {

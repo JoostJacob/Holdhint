@@ -68,6 +68,12 @@ public struct ModifierTracker: Equatable, Sendable {
 
     public init() {}
 
+    /// Replace the latched fn/Globe bit with the keys that are actually down.
+    /// A dropped key-up leaves `functionKeyDown` true until this runs.
+    public mutating func adopt(_ set: ModifierSet) {
+        functionKeyDown = set.contains(.function)
+    }
+
     public mutating func flagsChanged(
         keyCode: UInt16,
         command: Bool,
@@ -79,6 +85,29 @@ public struct ModifierTracker: Equatable, Sendable {
         if keyCode == Self.functionKeyCode {
             functionKeyDown = functionFlag
         }
+        var set = ModifierSet()
+        if command { set.insert(.command) }
+        if option { set.insert(.option) }
+        if control { set.insert(.control) }
+        if shift { set.insert(.shift) }
+        if functionKeyDown { set.insert(.function) }
+        return set
+    }
+}
+
+extension ModifierSet {
+    /// Keys that are down right now.
+    ///
+    /// `functionKeyDown` must be the physical fn/Globe key (key code 63).
+    /// The `.function` flag is also set for arrow keys and F-keys, so it is
+    /// not an input here.
+    public static func polled(
+        command: Bool,
+        option: Bool,
+        control: Bool,
+        shift: Bool,
+        functionKeyDown: Bool
+    ) -> ModifierSet {
         var set = ModifierSet()
         if command { set.insert(.command) }
         if option { set.insert(.option) }

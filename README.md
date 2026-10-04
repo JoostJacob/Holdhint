@@ -1,6 +1,6 @@
 # Holdhint
 
-Holdhint is a free, open-source menu-bar app for macOS. Hold Fn (the Globe key), Command, Control, Option, Shift, or a combination of them. After a short pause (half a second by default) a dark panel appears on the display under the pointer and lists the keys you can still press, and what they do. Release the modifiers and the panel goes away.
+Holdhint is a free, open-source menu-bar app for macOS. Hold Fn (the Globe key), Command, Control, Option, Shift, or a combination of them. After a short pause (half a second by default) a dark panel appears on the display under the pointer and lists the keys you can still press, and what they do. Release the modifiers and the panel goes away. A click, Escape, or switching apps closes it too.
 
 The built-in list is system-wide: screenshots, Spotlight, switching apps, closing windows, Mission Control, and the shortcuts that work in most apps. If you also grant Accessibility permission, Holdhint adds shortcuts it can read from the front app’s menus. A menu shortcut for the same key replaces the built-in description, so the panel matches the app you are in.
 
@@ -10,9 +10,22 @@ The project folder may still be named `toetshud`. The app itself is Holdhint.
 
 ## Install
 
+Holdhint is not notarized. On macOS 15 (Sequoia) and macOS 26 (Tahoe) the first open is blocked on purpose. The dialog has two buttons: **Done** and **Move to Trash**. Click **Done**. Do not click **Move to Trash**.
+
 1. Download **Holdhint-x.y.z.dmg** from the [latest release](https://github.com/JoostJacob/Holdhint/releases/latest). It runs on Apple silicon and Intel Macs with macOS 14 or later.
-2. Open the DMG and drag **Holdhint** onto **Applications**.
-3. Open Holdhint from Applications. Because the app is free and not notarized by Apple, macOS blocks the first launch. Click **Done** (or **OK**), then go to **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the Holdhint message. Confirm once more. On older macOS versions you can instead right-click the app and choose **Open**.
+2. Open the disk image. Drag **Holdhint** onto the **Applications** folder. The disk image shows the same steps.
+3. Eject the disk image. In Applications, double-click **Holdhint**.
+4. macOS says Holdhint was not opened, because Apple could not verify it is free of malware. The buttons are **Done** and **Move to Trash**. Click **Done**.
+5. Open the Apple menu → **System Settings** → **Privacy & Security**. Scroll down to **Security**.
+6. Next to the message that Holdhint was blocked, click **Open Anyway**.
+7. Confirm with your password or Touch ID.
+8. macOS asks once more. Click **Open Anyway** again.
+
+Holdhint has no Dock icon. A ⌘ symbol appears in the menu bar, and a welcome window explains Input Monitoring.
+
+**Open Anyway** stays for about an hour after you click **Done**. If it is gone, double-click Holdhint again, click **Done** again, and return to Privacy & Security.
+
+On macOS 14 (Sonoma) you can instead Control-click the app, choose **Open**, and confirm **Open**.
 
 If you prefer Terminal, this removes the download flag so the app opens normally: `xattr -dr com.apple.quarantine /Applications/Holdhint.app`
 
@@ -42,14 +55,17 @@ Holdhint has no Dock icon. Look for a ⌘ symbol in the menu bar.
 
 macOS will not deliver system-wide key events until you allow it. The menu shows the current state, for example `Input Monitoring: off · Accessibility: off`.
 
-1. Open Holdhint (see Install above for the one-time **Open Anyway** step).
-2. Apple menu → **System Settings → Privacy & Security → Input Monitoring**.
-3. Turn **Holdhint** on. If it is not in the list, click **+**, select `Holdhint.app` (in Applications, or the copy you built), and turn it on. Enable the copy you actually open. A second copy in another folder is a different app to macOS.
-4. For shortcuts from the front app’s menus, do the same under **Privacy & Security → Accessibility**. The built-in system list works with Input Monitoring alone. Accessibility is the extra.
-5. If a switch was already on and the panel still does not appear, turn that switch off, turn it on again, then quit Holdhint and open it again. Rebuilding the app changes its signature, and macOS then ignores the old approval until you toggle it.
-6. Quit Holdhint from its menu and open `Holdhint.app` again. Permission changes apply after a restart of the app.
+When Input Monitoring is off, Holdhint opens a welcome window:
 
-The menu items **Input Monitoring Settings…** and **Accessibility Settings…** open those pages for you.
+1. Click **Open Input Monitoring Settings**. If macOS also asks whether Holdhint can monitor input, click **Open System Settings** in that dialog.
+2. Turn **Holdhint** on. If it is not in the list, click **+**, select this copy of `Holdhint.app`, and turn it on. A second copy in another folder is a different app to macOS.
+3. Leave the welcome window open. When the switch is on, Holdhint restarts itself. The panel works after that restart. If it does not restart, quit Holdhint from the ⌘ menu and open it again.
+
+You can close the window with **Not Now**. It comes back on the next launch until Input Monitoring is on. The menu item **Input Monitoring Settings…** opens that page directly.
+
+For shortcuts from the front app’s menus, use **Accessibility Settings…** or **Privacy & Security → Accessibility**, and turn Holdhint on there too. The built-in system list works with Input Monitoring alone. Accessibility is the extra.
+
+If a switch was already on and the panel still does not appear, turn that switch off, turn it on again, then quit Holdhint and open it again. Rebuilding the app changes its signature, and macOS then ignores the old approval until you toggle it.
 
 ### Try it
 
@@ -60,7 +76,7 @@ Hold **Command, Control, and Shift** together. Do not press another key yet. Aft
 
 Release the modifiers. The panel disappears. Pressing a shortcut key also dismisses it, so it does not stay up after you use one.
 
-Clicks pass through the panel, and it does not take focus, so you can keep working underneath it.
+A click passes through to the app underneath and also closes the panel. Escape and switching apps close it too. It does not take focus. If a key-up is missed, the panel closes on its own within a moment, and it never stays up longer than half a minute.
 
 Other chords:
 

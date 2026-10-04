@@ -99,6 +99,28 @@ _ = session.modifierChange([.command])
 check(session.modifierChange([.command, .shift]) == [.armTimer], "restart wait")
 check(session.modifierChange([]) == [.disarmTimer], "cancel on release")
 
+session = HoldSession()
+_ = session.modifierChange([.command])
+_ = session.timerFired()
+check(session.suppress(holding: []) == [.hide], "release hides")
+check(session.phase == .idle, "release is idle")
+check(session.held.isEmpty, "release clears keys")
+
+session = HoldSession()
+_ = session.modifierChange([.function])
+_ = session.timerFired()
+check(session.suppress(holding: [.function]) == [.hide], "timeout hides")
+check(session.phase == .suppressed, "timeout stays quiet")
+check(session.modifierChange([.function]) == [], "same chord stays quiet")
+check(session.modifierChange([]) == [], "release after timeout")
+check(session.phase == .idle, "idle after a quiet release")
+
+session = HoldSession()
+_ = session.modifierChange([.command])
+check(session.suppress(holding: [.command]) == [.disarmTimer], "click while waiting")
+check(session.phase == .suppressed, "waiting click does not show")
+check(session.timerFired() == [], "timer after a click does nothing")
+
 let symbols = ModifierSet([.command, .shift, .control])
 check(symbols.symbols == "⌃ ⇧ ⌘", "symbol order")
 check(ModifierSet(names: ["shift", "ctrl", "cmd"]) == symbols, "aliases")
@@ -148,6 +170,89 @@ check(arrowWhileHeld == [.function, .shift], "arrow must not clear a real fn hol
 let released = tracker.flagsChanged(keyCode: 63, command: false, option: false, control: false, shift: true, functionFlag: false)
 check(released == [.shift], "physical fn up")
 check(tracker.functionKeyDown == false, "fn latch cleared")
+
+var stuck = ModifierTracker()
+_ = stuck.flagsChanged(keyCode: 63, command: true, option: false, control: false, shift: false, functionFlag: true)
+check(stuck.functionKeyDown, "fn latched")
+stuck.adopt([])
+check(!stuck.functionKeyDown, "adopt clears a missed fn release")
+let arrowAfter = stuck.flagsChanged(keyCode: 126, command: false, option: false, control: false, shift: false, functionFlag: true)
+check(arrowAfter.isEmpty, "arrow after adopt is not fn")
+stuck.adopt([.function])
+check(stuck.functionKeyDown, "adopt can set fn")
+
+check(ModifierSet.polled(command: false, option: false, control: false, shift: false, functionKeyDown: false).isEmpty, "poll empty")
+check(ModifierSet.polled(command: true, option: false, control: false, shift: true, functionKeyDown: false) == [.command, .shift], "poll ignores the function flag")
+check(ModifierSet.polled(command: false, option: false, control: false, shift: false, functionKeyDown: true) == [.function], "poll uses the physical fn key")
+
+let command: ModifierSet = [.command]
+let showing = HoldSession.Phase.showing
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .poll(polled: [], visibleFor: 0.2))
+        == .suppress(.modifiersReleased, holding: []),
+    "poll hides when nothing is held"
+)
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .poll(polled: command, visibleFor: 1))
+        == .none,
+    "poll keeps a held chord"
+)
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .poll(polled: command, visibleFor: 29.9))
+        == .none,
+    "just under the timeout"
+)
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .poll(polled: command, visibleFor: 30))
+        == .suppress(.timedOut, holding: command),
+    "hard timeout"
+)
+check(
+    PanelGuard.action(phase: showing, held: [.function, .command], signal: .poll(polled: command, visibleFor: 1))
+        == .sync(command),
+    "stuck fn follows the real keys"
+)
+check(
+    PanelGuard.action(phase: .waiting, held: command, signal: .poll(polled: [], visibleFor: 0))
+        == .suppress(.modifiersReleased, holding: []),
+    "missed release before the panel shows"
+)
+check(
+    PanelGuard.action(phase: .waiting, held: [.function], signal: .poll(polled: command, visibleFor: 0))
+        == .none,
+    "waiting does not restart on a different poll"
+)
+check(
+    PanelGuard.action(phase: .idle, held: [], signal: .poll(polled: [], visibleFor: 40)) == .none,
+    "idle poll"
+)
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .click(polled: command))
+        == .suppress(.clicked, holding: command),
+    "click"
+)
+check(
+    PanelGuard.action(phase: showing, held: command, signal: .escape(polled: []))
+        == .suppress(.escape, holding: []),
+    "escape"
+)
+check(
+    PanelGuard.action(phase: .waiting, held: command, signal: .applicationSwitched(polled: command))
+        == .suppress(.applicationSwitched, holding: command),
+    "switch app"
+)
+check(
+    PanelGuard.action(phase: .idle, held: [], signal: .click(polled: [])) == .none,
+    "click while idle leaves the session"
+)
+check(PanelGuard.Signal.click(polled: []).isUserDismissal, "click closes a sample")
+check(!PanelGuard.Signal.poll(polled: [], visibleFor: 0).isUserDismissal, "poll leaves a sample")
+check(
+    PanelGuard.action(phase: .suppressed, held: command, signal: .poll(polled: [], visibleFor: 5))
+        == .sync([]),
+    "quiet chord notices the release"
+)
+check(PanelGuard.escapeKeyCode == 53, "escape key code")
 
 if failures == 0 {
     fputs("CHECKS OK\n", stderr)

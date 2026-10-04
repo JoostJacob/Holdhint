@@ -14,6 +14,11 @@ final class HintController {
     private var pending: DispatchWorkItem?
     private var globalMonitor: Any?
     private var localMonitor: Any?
+    private var frontObserver: NSObjectProtocol?
+    private var frontPID: pid_t = 0
+    private var pollTimer: DispatchSourceTimer?
+    private var sessionShownAt: Date?
+    private var overlayShownAt: Date?
     private var activity: NSObjectProtocol?
     private var sampleSet: ModifierSet?
     private var sampleToken = 0
@@ -40,7 +45,9 @@ final class HintController {
     func start() {
         catalog = Catalog.loadPreferred()
         publishWarnings()
-        let mask: NSEvent.EventTypeMask = [.flagsChanged, .keyDown]
+        let mask: NSEvent.EventTypeMask = [
+            .flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown
+        ]
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: mask) { [weak self] event in
             self?.handle(event)
         }
@@ -48,6 +55,21 @@ final class HintController {
             self?.handle(event)
             return event
         }
+        frontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+        frontObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.noteFrontApplication(notification)
+        }
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + PanelGuard.pollInterval, repeating: PanelGuard.pollInterval)
+        timer.setEventHandler { [weak self] in
+            self?.pollModifiers()
+        }
+        timer.resume()
+        pollTimer = timer
         activity = ProcessInfo.processInfo.beginActivity(
             options: [.userInitiatedAllowingIdleSystemSleep],
             reason: "Watching modifier keys to show shortcut hints"
@@ -68,6 +90,8 @@ final class HintController {
         pending = nil
         session = HoldSession()
         modifiers = ModifierTracker()
+        sessionShownAt = nil
+        overlayShownAt = nil
         sampleSet = nil
         sampleToken += 1
         overlay.dismiss()
@@ -119,18 +143,23 @@ final class HintController {
         try overlay.writePNG(to: url)
     }
 
-    func requestPermissionsOnce() {
-        let defaults = UserDefaults.standard
-        if !CGPreflightListenEventAccess(), !defaults.bool(forKey: "didRequestInputMonitoring") {
-            defaults.set(true, forKey: "didRequestInputMonitoring")
-            CGRequestListenEventAccess()
-        }
-        if !AXIsProcessTrusted(), !defaults.bool(forKey: "didRequestAccessibility") {
-            defaults.set(true, forKey: "didRequestAccessibility")
-            let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
-            let options = [key: true] as CFDictionary
-            AXIsProcessTrustedWithOptions(options)
-        }
+    /// Command, Option, Control, Shift, and the physical fn key.
+    /// `NSEvent.modifierFlags` can stay stale in a menu-bar app after a dropped
+    /// key-up, so this reads the session state instead. The function flag is
+    /// ignored: arrow keys and F-keys set it without key code 63 being down.
+    static func currentModifiers() -> ModifierSet {
+        let flags = CGEventSource.flagsState(.combinedSessionState)
+        let functionKeyDown = CGEventSource.keyState(
+            .combinedSessionState,
+            key: ModifierTracker.functionKeyCode
+        )
+        return ModifierSet.polled(
+            command: flags.contains(.maskCommand),
+            option: flags.contains(.maskAlternate),
+            control: flags.contains(.maskControl),
+            shift: flags.contains(.maskShift),
+            functionKeyDown: functionKeyDown
+        )
     }
 
     private func publishWarnings() {
@@ -139,6 +168,17 @@ final class HintController {
 
     private func handle(_ event: NSEvent) {
         guard enabled else { return }
+        let polled = Self.currentModifiers()
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            handleGuard(.click(polled: polled))
+            return
+        case .keyDown where event.keyCode == PanelGuard.escapeKeyCode:
+            handleGuard(.escape(polled: polled))
+            return
+        default:
+            break
+        }
         if event.type == .keyDown {
             // fn/Globe is a modifier. A keyDown for it must not dismiss the panel.
             if event.keyCode == ModifierTracker.functionKeyCode { return }
@@ -157,6 +197,63 @@ final class HintController {
         }
     }
 
+    private func noteFrontApplication(_ notification: Notification) {
+        let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+        let pid = application?.processIdentifier ?? 0
+        if pid == 0 || pid == frontPID { return }
+        frontPID = pid
+        handleGuard(.applicationSwitched(polled: Self.currentModifiers()))
+    }
+
+    private func pollModifiers() {
+        guard enabled else { return }
+        if overlay.isShowing {
+            if overlayShownAt == nil { overlayShownAt = Date() }
+        } else {
+            overlayShownAt = nil
+        }
+        let polled = Self.currentModifiers()
+        let visibleFor = sessionShownAt.map { Date().timeIntervalSince($0) } ?? 0
+        handleGuard(.poll(polled: polled, visibleFor: visibleFor))
+        // Samples and a missed session update share this cap, so nothing stays up.
+        if let overlayShownAt, overlay.isShowing, Date().timeIntervalSince(overlayShownAt) >= PanelGuard.hardTimeout {
+            forceClose(holding: polled)
+        }
+    }
+
+    private func handleGuard(_ signal: PanelGuard.Signal) {
+        guard enabled else { return }
+        let decision = PanelGuard.action(phase: session.phase, held: session.held, signal: signal)
+        switch decision {
+        case .none:
+            break
+        case .sync(let set):
+            modifiers.adopt(set)
+            apply(session.modifierChange(set))
+        case .suppress(_, let holding):
+            modifiers.adopt(holding)
+            apply(session.suppress(holding: holding))
+        }
+        if signal.isUserDismissal {
+            dismissSample()
+        }
+    }
+
+    private func forceClose(holding set: ModifierSet) {
+        modifiers.adopt(set)
+        apply(session.suppress(holding: set))
+        dismissSample()
+    }
+
+    private func dismissSample() {
+        sampleSet = nil
+        sampleToken += 1
+        overlay.dismiss()
+        if !overlay.isShowing {
+            overlayShownAt = nil
+        }
+    }
+
     private func apply(_ effects: [HoldSession.Effect]) {
         for effect in effects {
             switch effect {
@@ -168,10 +265,13 @@ final class HintController {
             case .show(let set):
                 sampleSet = nil
                 sampleToken += 1
+                if sessionShownAt == nil { sessionShownAt = Date() }
                 render(set: set)
             case .hide:
+                sessionShownAt = nil
                 sampleSet = nil
                 overlay.dismiss()
+                overlayShownAt = nil
             }
         }
     }
