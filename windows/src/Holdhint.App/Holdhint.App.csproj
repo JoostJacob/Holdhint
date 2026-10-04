@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <!-- Both are required. net8.0-windows alone is parsed as Windows 7 and then overwrites a lone version. -->
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.17763.0</TargetPlatformVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- DPI stays in app.manifest so a Mac build can see PerMonitorV2 inside the exe. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+    <ApplicationIcon>holdhint.ico</ApplicationIcon>
+    <RootNamespace>Holdhint</RootNamespace>
+    <AssemblyName>Holdhint</AssemblyName>
+    <StartupObject>Holdhint.Program</StartupObject>
+    <Description>Hold a modifier key to see what the other keys do.</Description>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- UI Automation ships with the WPF reference assemblies. The app does not open a WPF window. -->
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Holdhint.Core\Holdhint.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="holdhint.ico" LogicalName="Holdhint.holdhint.ico" />
+  </ItemGroup>
+</Project>

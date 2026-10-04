@@ -6,9 +6,11 @@ The built-in list is system-wide: screenshots, Spotlight, switching apps, closin
 
 Holdhint never plays a sound. It does not record, store, or send what you type.
 
-The project folder may still be named `toetshud`. The app itself is Holdhint.
+The project folder may still be named `toetshud`. The app itself is Holdhint. The Windows build is described under [Windows](#windows).
 
 ## Install
+
+These steps are for macOS. Windows install steps are in [Windows](#windows).
 
 Holdhint is not notarized. On macOS 15 (Sequoia) and macOS 26 (Tahoe) the first open is blocked on purpose. The dialog has two buttons: **Done** and **Move to Trash**. Click **Done**. Do not click **Move to Trash**.
 
@@ -147,6 +149,95 @@ The Command Line Tools on a Mac without full Xcode do not ship a working `swift 
 ```
 
 `Holdhint.app/Contents/MacOS/Holdhint --self-test` also checks the bundled list and that the panel ignores clicks and does not take focus. It exits on its own.
+
+## Windows
+
+Holdhint for Windows shows the same kind of panel. Hold Ctrl, Alt, Shift, the Windows key, or a combination of them. After a short pause (half a second by default) a dark panel appears on the display under the pointer and lists the keys you can still press, and what they do. Release the modifiers and the panel goes away. A click, Escape, or switching programs closes it too. The panel does not take focus. A click passes through to the program underneath.
+
+The built-in list covers the general Windows shortcuts: the Windows key, the clipboard, switching windows, virtual desktops, and the shortcuts that work in most programs. When Windows exposes them, Holdhint also reads shortcuts from the front program’s menus. A menu shortcut for the same key replaces the built-in description. Chrome, Electron, and the Office ribbon often expose nothing, so those programs also have a built-in list (new tab, a private window, and the usual editing keys).
+
+Holdhint does not need an administrator account. It does not use the network. It does not record, store, or send what you type. A small diagnostic log is written to `%LOCALAPPDATA%\Holdhint\holdhint.log`. The log records whether the keyboard hook started. It does not record keys.
+
+### Install on Windows
+
+The program is not signed. Windows SmartScreen warns about that on purpose.
+
+Use the x64 setup on most PCs. Use the arm64 setup only when Settings → System → About says the processor is ARM. The file names look like `Holdhint-1.2.0-win-x64-setup.exe` and `Holdhint-1.2.0-win-arm64-setup.exe`. They are produced by the build below, in `windows/dist/`.
+
+1. Copy the setup program to the Windows PC. If the browser says the file is uncommon, choose **Keep**.
+2. Double-click it. If Windows says **Windows protected your PC**, click **More info**, then **Run anyway**.
+3. The installer can start Holdhint when you sign in. Leave that on, or turn it off. You can change it later from the Holdhint menu. The installer does not ask for an administrator password.
+4. Holdhint has no taskbar button. Look next to the clock for the Holdhint icon. If you do not see it, click the arrow (^) that shows hidden icons.
+
+A zip with `Holdhint.exe`, `holdhint.ico`, and `LICENSE.txt` is the same program without an installer. Unzip it and run `Holdhint.exe`. SmartScreen can show the same **More info** → **Run anyway** warning.
+
+To remove Holdhint, use Settings → Apps, or run `Uninstall.exe` in the install folder (`%LOCALAPPDATA%\Holdhint`). Your shortcut file in `%APPDATA%\Holdhint` is kept.
+
+### Try it
+
+No privacy switch is required.
+
+Hold **Ctrl**. Do not press another key yet. After about half a second a panel appears on the screen where the pointer is. The text should be right side up. It includes Copy, Paste, and the other usual Ctrl shortcuts. Release Ctrl. The panel disappears.
+
+Other chords:
+
+- Hold the **Windows key** for Search, File Explorer, task view, virtual desktops, and the other system shortcuts.
+- Hold **Windows and Shift** for the snipping shortcut. **S** copies a region to the clipboard.
+
+**Show Sample (Win+Shift, 5s)** in the menu shows that panel for a few seconds without holding the keys. **Show Hints** turns the live panel off without quitting.
+
+A click passes through to the program underneath and also closes the panel. Escape and switching programs close it too. If a key-up is missed, the panel closes on its own within a moment, and it never stays up longer than half a minute. If it is still there, press Escape, or right-click the tray icon and choose **Quit**.
+
+A quick tap of the Windows key still opens the Start menu. A hold long enough for the panel to appear does not: Holdhint swallows that key’s release so Start does not open on top of the panel. Alt is never swallowed.
+
+### Editing the shortcut list
+
+Titles in the copy shipped with the program are English. To use another language, edit the titles.
+
+**Edit Shortcuts…** copies the built-in file, the first time, to:
+
+```text
+%APPDATA%\Holdhint\shortcuts.json
+```
+
+Holdhint then uses that file instead of the one inside the program, and reloads it when you save. **Reload Shortcuts** loads it immediately. If the file is not valid JSON, Holdhint keeps the previous list and shows the error in the menu. A broken file at the next launch is skipped, and the built-in list is used until the file is valid again.
+
+```json
+{
+  "delaySeconds": 0.5,
+  "shortcuts": [
+    {
+      "modifiers": ["win", "shift"],
+      "key": "s",
+      "title": "Snip a region to the clipboard",
+      "note": "The picture goes to the clipboard."
+    }
+  ]
+}
+```
+
+- `delaySeconds` is optional. Values outside 0.1–3 are clamped. The default is 0.5.
+- `modifiers` is any combination of `ctrl`, `alt`, `shift`, and `win` (also `control`, `windows`, `strg`, `umschalt`). `fn` and `command` are rejected. They are Mac keys, and treating them as Windows shortcuts would list the wrong keys.
+- `key` is the key still to press: a letter, a digit, or a name such as `space`, `tab`, `enter`, `escape`, `delete`, `up`, `down`, `left`, `right`.
+- `title` is the main line. `note` is optional and is shown under the title in quieter type.
+- The panel lists only the shortcuts whose modifiers match exactly the keys you are holding.
+- While the front program’s menus are available, a menu item with the same modifiers and key replaces the JSON row.
+
+Delete the file and choose **Reload Shortcuts** to go back to the built-in list.
+
+### Build
+
+You need the .NET 8 SDK. The setup programs also need [NSIS](https://nsis.sourceforge.io/) (`makensis`). On a Mac that is `brew install makensis`. The SDK on this project’s Mac is installed in `~/.dotnet`.
+
+```bash
+export PATH="$HOME/.dotnet:$PATH"
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+./windows/build.sh
+```
+
+That runs the unit tests, then publishes self-contained programs for `win-x64` and `win-arm64`. The setup programs and the zip files land in `windows/dist/`. That folder is not committed.
+
+`Holdhint.exe --self-test` checks the built-in list, that the panel window is click-through, and that the keyboard hook installs. It writes the result to `%LOCALAPPDATA%\Holdhint\self-test.txt` and shows a short message. It does not stay running.
 
 ## License
 

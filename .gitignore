@@ -1,6 +1,8 @@
 .build/
-Holdhint.app/
+/Holdhint.app/
 .DS_Store
 *.xcuserstate
 xcuserdata/
 dist/
+windows/**/bin/
+windows/**/obj/

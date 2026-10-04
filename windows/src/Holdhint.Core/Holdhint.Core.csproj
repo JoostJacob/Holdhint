@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Holdhint.Core</RootNamespace>
+    <AssemblyName>Holdhint.Core</AssemblyName>
+    <Description>Shortcut matching for Holdhint. No Windows API calls, so the tests run on macOS.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\shortcuts.json" />
+    <EmbeddedResource Include="Resources\apps.json" />
+  </ItemGroup>
+</Project>

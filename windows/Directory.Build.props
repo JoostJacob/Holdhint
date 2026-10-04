@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <Company>Joost Jacob</Company>
+    <Product>Holdhint</Product>
+    <Copyright>Copyright © 2026 Joost Jacob</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
