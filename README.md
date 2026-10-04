@@ -1,6 +1,6 @@
 # Holdhint
 
-Holdhint is a free, open-source menu-bar app for macOS. Hold Command, Control, Option, Shift, or a combination of them. After a short pause (half a second by default) a dark panel appears on the display under the pointer and lists the keys you can still press, and what they do. Release the modifiers and the panel goes away.
+Holdhint is a free, open-source menu-bar app for macOS. Hold Fn (the Globe key), Command, Control, Option, Shift, or a combination of them. After a short pause (half a second by default) a dark panel appears on the display under the pointer and lists the keys you can still press, and what they do. Release the modifiers and the panel goes away.
 
 The built-in list is system-wide: screenshots, Spotlight, switching apps, closing windows, Mission Control, and the shortcuts that work in most apps. If you also grant Accessibility permission, Holdhint adds shortcuts it can read from the front app’s menus. A menu shortcut for the same key replaces the built-in description, so the panel matches the app you are in.
 
@@ -67,6 +67,7 @@ Other chords:
 - Hold **Command** for copy, paste, quit, Spotlight (Space), app switching (Tab), and the rest of the usual Command shortcuts.
 - Hold **Command and Shift** for the screenshot shortcuts that save a file on the Desktop (3, 4, and 5).
 - Hold **Control** for Mission Control and moving between spaces.
+- Hold **Fn** (Globe, 🌐) for the Dock, Control Center, Notification Center, emoji, dictation, a Quick Note, and the desktop. Arrow keys scroll a page or jump to the start or end, and Delete deletes forward. The top row sends F1–F12 instead of the printed feature. Hold **Fn and Control** to tile the front window.
 
 **Show Sample** in the menu shows the Command-Control-Shift panel for a few seconds without waiting for the keys. **Show Hints** turns the live panel off without quitting.
 
@@ -108,7 +109,7 @@ Holdhint then uses that file instead of the one inside the app, and reloads it w
 ```
 
 - `delaySeconds` is optional. Values outside 0.1–3 are clamped. The default is 0.5.
-- `modifiers` is any combination of `command`, `option`, `control`, and `shift` (also `cmd`, `opt`, `alt`, `ctrl`). The panel lists only the shortcuts whose modifiers match exactly the keys you are holding.
+- `modifiers` is any combination of `fn`, `command`, `option`, `control`, and `shift` (also `globe`, `function`, `cmd`, `opt`, `alt`, `ctrl`). The panel lists only the shortcuts whose modifiers match exactly the keys you are holding.
 - `key` is the key still to press: a letter, a digit, or a name such as `space`, `tab`, `return`, `escape`, `delete`, `up`, `down`, `left`, `right`, `backtick`. Punctuation can be written as `/` or `slash`, `-` or `minus`, and so on.
 - `title` is the main line. `note` is optional and is shown under the title in quieter type.
 - While the front app’s menus are available, a menu item with the same modifiers and key replaces the JSON row.
@@ -119,7 +120,7 @@ Delete the file in Application Support to go back to the built-in list, then cho
 
 Holdhint does not use the network. It does not play sound. It does not keep a log of keys.
 
-It watches modifier keys (Command, Option, Control, Shift) so it knows when to show the panel. When any other key goes down, it hides the panel and does not store that key. With Accessibility permission it reads menu titles and the shortcuts written on them. It does not read the text you are editing.
+It watches modifier keys (Fn, Command, Option, Control, Shift) so it knows when to show the panel. When any other key goes down, it hides the panel and does not store that key. With Accessibility permission it reads menu titles and the shortcuts written on them. It does not read the text you are editing.
 
 ## Checks
 

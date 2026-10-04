@@ -424,6 +424,211 @@
       "key": "d",
       "title": "Duplicate",
       "note": "Finder. In many browsers this bookmarks the page."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "a",
+      "title": "Show or hide the Dock"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "c",
+      "title": "Show or hide Control Center"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "d",
+      "title": "Start or stop dictation",
+      "note": "You can choose a different shortcut in Keyboard settings."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "e",
+      "title": "Emoji and symbols"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "h",
+      "title": "Show the desktop"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "n",
+      "title": "Show or hide Notification Center"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "q",
+      "title": "Create a Quick Note"
+    },
+    {
+      "modifiers": ["fn", "shift"],
+      "key": "a",
+      "title": "Show or hide Apps",
+      "note": "macOS Tahoe 26 and later. Earlier macOS opens Launchpad."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "delete",
+      "title": "Delete the character to the right",
+      "note": "Forward delete, on keyboards without that key."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "up",
+      "title": "Scroll up one page"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "down",
+      "title": "Scroll down one page"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "left",
+      "title": "Scroll to the beginning of the document"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "right",
+      "title": "Scroll to the end of the document"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f1",
+      "title": "Send F1",
+      "note": "Not brightness or the other printed feature. Keyboard settings can reverse the top row."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f2",
+      "title": "Send F2"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f3",
+      "title": "Send F3"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f4",
+      "title": "Send F4"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f5",
+      "title": "Send F5"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f6",
+      "title": "Send F6"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f7",
+      "title": "Send F7"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f8",
+      "title": "Send F8"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f9",
+      "title": "Send F9"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f10",
+      "title": "Send F10"
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f11",
+      "title": "Show the desktop",
+      "note": "Fn-F11, when the top row needs Fn to type a function key."
+    },
+    {
+      "modifiers": ["fn"],
+      "key": "f12",
+      "title": "Send F12"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "f",
+      "title": "Fill the desktop with this window"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "c",
+      "title": "Center this window"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "r",
+      "title": "Return this window to its previous size"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "left",
+      "title": "Move this window to the left half"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "right",
+      "title": "Move this window to the right half"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "up",
+      "title": "Move this window to the top half"
+    },
+    {
+      "modifiers": ["fn", "control"],
+      "key": "down",
+      "title": "Move this window to the bottom half"
+    },
+    {
+      "modifiers": ["fn", "control", "shift"],
+      "key": "left",
+      "title": "Move this window left and the next window right"
+    },
+    {
+      "modifiers": ["fn", "control", "shift"],
+      "key": "right",
+      "title": "Move this window right and the next window left"
+    },
+    {
+      "modifiers": ["fn", "control", "shift"],
+      "key": "up",
+      "title": "Move this window up and the next window down"
+    },
+    {
+      "modifiers": ["fn", "control", "shift"],
+      "key": "down",
+      "title": "Move this window down and the next window up"
+    },
+    {
+      "modifiers": ["fn", "control", "option", "shift"],
+      "key": "left",
+      "title": "Move this window left and two windows into the right quarters"
+    },
+    {
+      "modifiers": ["fn", "control", "option", "shift"],
+      "key": "right",
+      "title": "Move this window right and two windows into the left quarters"
+    },
+    {
+      "modifiers": ["fn", "control", "option", "shift"],
+      "key": "up",
+      "title": "Move this window up and two windows into the bottom quarters"
+    },
+    {
+      "modifiers": ["fn", "control", "option", "shift"],
+      "key": "down",
+      "title": "Move this window down and two windows into the top quarters"
     }
   ]
 }

@@ -4,23 +4,13 @@ import CoreGraphics
 import Darwin
 import HoldhintCore
 
-extension ModifierSet {
-    init(eventFlags flags: NSEvent.ModifierFlags) {
-        var set = ModifierSet()
-        if flags.contains(.command) { set.insert(.command) }
-        if flags.contains(.option) { set.insert(.option) }
-        if flags.contains(.control) { set.insert(.control) }
-        if flags.contains(.shift) { set.insert(.shift) }
-        self = set
-    }
-}
-
 final class HintController {
     let overlay = OverlayController()
     private(set) var catalog = Catalog.loadPreferred()
     private(set) var loadWarning: String?
     private(set) var enabled = true
     private var session = HoldSession()
+    private var modifiers = ModifierTracker()
     private var pending: DispatchWorkItem?
     private var globalMonitor: Any?
     private var localMonitor: Any?
@@ -77,6 +67,7 @@ final class HintController {
         pending?.cancel()
         pending = nil
         session = HoldSession()
+        modifiers = ModifierTracker()
         sampleSet = nil
         sampleToken += 1
         overlay.dismiss()
@@ -149,9 +140,20 @@ final class HintController {
     private func handle(_ event: NSEvent) {
         guard enabled else { return }
         if event.type == .keyDown {
+            // fn/Globe is a modifier. A keyDown for it must not dismiss the panel.
+            if event.keyCode == ModifierTracker.functionKeyCode { return }
             apply(session.keyDown())
         } else if event.type == .flagsChanged {
-            apply(session.modifierChange(ModifierSet(eventFlags: event.modifierFlags)))
+            let flags = event.modifierFlags
+            let set = modifiers.flagsChanged(
+                keyCode: event.keyCode,
+                command: flags.contains(.command),
+                option: flags.contains(.option),
+                control: flags.contains(.control),
+                shift: flags.contains(.shift),
+                functionFlag: flags.contains(.function)
+            )
+            apply(session.modifierChange(set))
         }
     }
 

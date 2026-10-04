@@ -192,6 +192,11 @@ enum SelfTest {
         check(savedToDisk?.title.localizedCaseInsensitiveContains("clipboard") == false, "file screenshot must not say clipboard")
         check(savedToDisk?.note?.localizedCaseInsensitiveContains("Desktop") == true, "file screenshot should mention the Desktop")
 
+        let globe = catalog.matching([.function])
+        check(globe.contains { $0.key == "c" }, "fn should list Control Center")
+        check(!globe.contains { $0.key == "m" }, "fn-m is not listed")
+        check(catalog.matching([.function, .control]).contains { $0.key == "f" }, "fn-control-f tiles the window")
+
         var seen = Set<String>()
         for shortcut in catalog.shortcuts {
             let identity = "\(shortcut.modifiers.rawValue)|\(shortcut.key)"
