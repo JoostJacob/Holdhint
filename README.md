@@ -162,7 +162,7 @@ Holdhint does not need an administrator account. It does not use the network. It
 
 The program is not signed. Windows SmartScreen warns about that on purpose.
 
-Use the x64 setup on most PCs. Use the arm64 setup only when Settings → System → About says the processor is ARM. The file names look like `Holdhint-1.2.0-win-x64-setup.exe` and `Holdhint-1.2.0-win-arm64-setup.exe`. They are produced by the build below, in `windows/dist/`.
+Use the x64 setup on most PCs. Use the arm64 setup only when Settings → System → About says the processor is ARM. The file names look like `Holdhint-1.2.1-win-x64-setup.exe` and `Holdhint-1.2.1-win-arm64-setup.exe`. They are produced by the build below, in `windows/dist/`.
 
 1. Copy the setup program to the Windows PC. If the browser says the file is uncommon, choose **Keep**.
 2. Double-click it. If Windows says **Windows protected your PC**, click **More info**, then **Run anyway**.

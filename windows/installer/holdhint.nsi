@@ -1,5 +1,5 @@
 ; Per-user Holdhint installer. No administrator rights.
-; Build: makensis -DARCH=x64 -DVER=1.2.0 -DSTAGE=... -DOUTDIR=... -DICON=... holdhint.nsi
+; Build: makensis -DARCH=x64 -DVER=1.2.1 -DSTAGE=... -DOUTDIR=... -DICON=... holdhint.nsi
 
 Unicode True
 !include "MUI2.nsh"
@@ -11,7 +11,7 @@ Unicode True
   !error "Pass -DARCH=x64 or -DARCH=arm64"
 !endif
 !ifndef VER
-  !error "Pass -DVER=1.2.0"
+  !error "Pass -DVER=1.2.1"
 !endif
 !ifndef STAGE
   !error "Pass -DSTAGE=path to Holdhint.exe, holdhint.ico, and LICENSE.txt"

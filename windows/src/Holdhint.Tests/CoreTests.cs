@@ -377,3 +377,195 @@ public class AppProfileTests
         Assert.Empty(profiles.ForProcess("chrome.exe"));
     }
 }
+
+public class StuckWindowsKeyTests
+{
+    static ModifierReading WinDown(bool left = false, bool right = false) => new(LeftWin: left, RightWin: right);
+
+    static void ShowWin(HintEngine engine)
+    {
+        engine.ModifiersChanged(ModifierSet.Win);
+        Assert.Equal(new[] { HoldSession.Effect.Show(ModifierSet.Win) }, engine.DelayElapsed());
+        Assert.Equal(HoldSession.Phase.Showing, engine.Phase);
+    }
+
+    [Fact]
+    public void A_swallowed_release_stays_up_when_later_polls_still_say_down()
+    {
+        var keys = new ModifierTracker();
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        Assert.Equal(ModifierSet.Win, keys.Resync(WinDown(left: true)));
+
+        keys.Observe(VirtualKeys.LeftWin, up: true, swallowed: true);
+        Assert.Equal(ModifierSet.None, keys.Current);
+        Assert.Equal(ModifierSet.None, keys.Resync(WinDown(left: true)));
+        Assert.Equal(ModifierSet.None, keys.Resync(WinDown(left: true)));
+
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        Assert.Equal(ModifierSet.Win, keys.Resync(WinDown(left: true)));
+    }
+
+    [Fact]
+    public void A_dropped_swallowed_release_is_counted_without_the_key_event()
+    {
+        var keys = new ModifierTracker();
+        keys.Observe(VirtualKeys.RightWin, up: false, swallowed: false);
+        keys.Resync(WinDown(right: true));
+        keys.NoteSwallowedWinUps(left: 0, right: 1);
+        Assert.Equal(ModifierSet.None, keys.Resync(WinDown(right: true)));
+    }
+
+    [Fact]
+    public void Left_and_right_windows_keys_are_released_apart()
+    {
+        var keys = new ModifierTracker();
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        keys.Observe(VirtualKeys.RightWin, up: false, swallowed: false);
+        Assert.Equal(ModifierSet.Win, keys.Resync(WinDown(left: true, right: true)));
+
+        keys.Observe(VirtualKeys.LeftWin, up: true, swallowed: true);
+        Assert.Equal(ModifierSet.Win, keys.Resync(WinDown(left: true, right: true)));
+
+        keys.Observe(VirtualKeys.RightWin, up: true, swallowed: true);
+        Assert.Equal(ModifierSet.None, keys.Resync(WinDown(left: true, right: true)));
+    }
+
+    [Fact]
+    public void A_stuck_windows_key_is_not_added_to_alt_ctrl_or_shift()
+    {
+        var keys = new ModifierTracker();
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        keys.Observe(VirtualKeys.LeftWin, up: true, swallowed: true);
+        keys.Resync(WinDown(left: true));
+
+        var alt = keys.Resync(new ModifierReading(LeftAlt: true, LeftWin: true));
+        Assert.Equal(ModifierSet.Alt, alt);
+        var ctrl = keys.Resync(new ModifierReading(LeftControl: true, LeftWin: true));
+        Assert.Equal(ModifierSet.Control, ctrl);
+        var shift = keys.Resync(new ModifierReading(LeftShift: true, LeftWin: true));
+        Assert.Equal(ModifierSet.Shift, shift);
+    }
+
+    [Fact]
+    public void An_unswallowed_release_can_be_corrected_by_the_next_poll()
+    {
+        var keys = new ModifierTracker();
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        Assert.Equal(ModifierSet.Win, keys.Resync(new ModifierReading()));
+        Assert.Equal(ModifierSet.None, keys.Resync(new ModifierReading()));
+    }
+
+    [Fact]
+    public void A_windows_key_already_down_at_startup_is_not_adopted()
+    {
+        var keys = new ModifierTracker();
+        Assert.Equal(ModifierSet.None, keys.Resync(WinDown(left: true, right: true)));
+        Assert.Equal(ModifierSet.None, keys.Resync(new ModifierReading()));
+        Assert.Equal(ModifierSet.Win, keys.Resync(WinDown(left: true)));
+    }
+
+    [Fact]
+    public void The_gate_swallows_one_release_and_not_the_next_hold()
+    {
+        var gate = new WinReleaseGate();
+        gate.Note(panelShowingWinChord: false, winHeld: true);
+        Assert.False(gate.Armed);
+
+        gate.Note(panelShowingWinChord: true, winHeld: true);
+        Assert.True(gate.Armed);
+        gate.Note(panelShowingWinChord: false, winHeld: true);
+        Assert.True(gate.Armed);
+
+        gate.Note(panelShowingWinChord: false, winHeld: false);
+        Assert.False(gate.Armed);
+        gate.Note(panelShowingWinChord: false, winHeld: true);
+        Assert.False(gate.Armed);
+    }
+
+    [Fact]
+    public void Closing_after_a_swallowed_release_does_not_leave_win_stuck()
+    {
+        var keys = new ModifierTracker();
+        var engine = new HintEngine();
+        var gate = new WinReleaseGate();
+
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        for (var i = 0; i < 8; i++)
+            keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        engine.ModifiersChanged(keys.Resync(WinDown(left: true)));
+        ShowWin(engine);
+        gate.Note(panelShowingWinChord: true, winHeld: true);
+
+        keys.Observe(VirtualKeys.LeftWin, up: true, swallowed: true);
+        var live = keys.Resync(WinDown(left: true));
+        Assert.Equal(ModifierSet.None, live);
+        Assert.Equal(new[] { HoldSession.Effect.Hide }, engine.ModifiersChanged(live));
+        gate.Note(panelShowingWinChord: false, winHeld: false);
+        Assert.False(gate.Armed);
+        Assert.Equal(HoldSession.Phase.Idle, engine.Phase);
+
+        foreach (var signal in new PanelGuard.Signal[]
+        {
+            new PanelGuard.Signal.EscapeKey(live),
+            new PanelGuard.Signal.Click(live),
+            new PanelGuard.Signal.AppSwitch(live),
+            new PanelGuard.Signal.Poll(live, PanelGuard.HardTimeoutSeconds),
+        })
+        {
+            Assert.IsType<PanelGuard.Action.Nothing>(PanelGuard.Decide(engine.Phase, engine.Held, signal));
+        }
+
+        keys.Observe(VirtualKeys.LeftMenu, up: false, swallowed: false);
+        var alt = keys.Resync(new ModifierReading(LeftAlt: true, LeftWin: true));
+        Assert.Equal(ModifierSet.Alt, alt);
+        engine.ModifiersChanged(alt);
+        engine.DelayElapsed();
+        Assert.Equal(ModifierSet.Alt, engine.Held);
+
+        keys.Observe(VirtualKeys.LeftMenu, up: true, swallowed: false);
+        Assert.Equal(new[] { HoldSession.Effect.Hide }, engine.ModifiersChanged(keys.Resync(WinDown(left: true))));
+        keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+        engine.ModifiersChanged(keys.Resync(WinDown(left: true)));
+        ShowWin(engine);
+        Assert.Equal(ModifierSet.Win, engine.Held);
+    }
+
+    [Fact]
+    public void Escape_click_and_timeout_while_win_is_held_recover_on_the_swallowed_release()
+    {
+        foreach (var close in new Func<HintEngine, ModifierSet, IReadOnlyList<HoldSession.Effect>>[]
+        {
+            (engine, held) => engine.Guard(new PanelGuard.Signal.EscapeKey(held)),
+            (engine, held) => engine.Guard(new PanelGuard.Signal.Click(held)),
+            (engine, held) => engine.Guard(new PanelGuard.Signal.Poll(held, PanelGuard.HardTimeoutSeconds)),
+        })
+        {
+            var keys = new ModifierTracker();
+            var engine = new HintEngine();
+            var gate = new WinReleaseGate();
+            keys.Observe(VirtualKeys.LeftWin, up: false, swallowed: false);
+            engine.ModifiersChanged(keys.Resync(WinDown(left: true)));
+            ShowWin(engine);
+            gate.Note(true, true);
+
+            var stillHeld = keys.Resync(WinDown(left: true));
+            Assert.Contains(HoldSession.Effect.Hide, close(engine, stillHeld));
+            Assert.Equal(HoldSession.Phase.Suppressed, engine.Phase);
+            Assert.Equal(ModifierSet.Win, engine.Held);
+            gate.Note(panelShowingWinChord: false, winHeld: true);
+            Assert.True(gate.Armed);
+
+            keys.NoteSwallowedWinUps(1, 0);
+            var released = keys.Resync(WinDown(left: true));
+            Assert.Equal(ModifierSet.None, released);
+            engine.ModifiersChanged(released);
+            gate.Note(false, false);
+            Assert.Equal(HoldSession.Phase.Idle, engine.Phase);
+            Assert.False(gate.Armed);
+
+            keys.Observe(VirtualKeys.LeftControl, up: false, swallowed: false);
+            var ctrl = keys.Resync(new ModifierReading(LeftControl: true, LeftWin: true));
+            Assert.Equal(ModifierSet.Control, ctrl);
+        }
+    }
+}

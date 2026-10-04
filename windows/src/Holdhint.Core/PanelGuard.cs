@@ -4,10 +4,12 @@ namespace Holdhint.Core;
 /// When the hint panel must close.
 ///
 /// Hiding only on a key-up misses the case where that event never arrives
-/// (a lost hook message, a swallowed Windows-key release, AltGr). The panel
-/// ignores clicks and does not take focus, so it would then stay up until
-/// the user quits. These rules are the pure half of the watchdog: poll the
-/// real modifier state, and hard-stop the panel after <see cref="HardTimeoutSeconds"/>.
+/// (a lost hook message, AltGr). A swallowed Windows-key release is reconciled
+/// by <see cref="ModifierTracker"/> before it is passed in: GetAsyncKeyState
+/// stays down for a release the hook ate, so the raw bit cannot be used here.
+/// The panel ignores clicks and does not take focus, so it would then stay up
+/// until the user quits. These rules are the pure half of the watchdog: poll the
+/// reconciled modifier state, and hard-stop the panel after <see cref="HardTimeoutSeconds"/>.
 /// </summary>
 public static class PanelGuard
 {

@@ -8,8 +8,8 @@ De bestanden staan op de Mac in de map `windows/dist` van dit project.
 
 Open op de laptop **Instellingen → Systeem → Info**.
 
-- Staat er **x64** of **x64-based processor**: gebruik `Holdhint-1.2.0-win-x64-setup.exe`.
-- Staat er **ARM**: gebruik `Holdhint-1.2.0-win-arm64-setup.exe`.
+- Staat er **x64** of **x64-based processor**: gebruik `Holdhint-1.2.1-win-x64-setup.exe`.
+- Staat er **ARM**: gebruik `Holdhint-1.2.1-win-arm64-setup.exe`.
 
 Kopieer dat ene bestand naar de laptop (USB-stick, mail, of wat je meestal gebruikt).
 
@@ -29,7 +29,7 @@ Kijk naast de klok, rechtsonder. Een donker icoon met een witte H.
 
 Zie je het niet: klik op het pijltje ^ (verborgen pictogrammen). Holdhint staat daar.
 
-Rechterklik op het icoon. In het menu staat de versie **Holdhint 1.2.0** en een regel **Hints on · keyboard hook on**.
+Rechterklik op het icoon. In het menu staat de versie **Holdhint 1.2.1** en een regel **Hints on · keyboard hook on**.
 
 Staat er **keyboard hook off**, dan kan het paneel de toetsen niet volgen. Kies **Quit**, start Holdhint opnieuw, en kijk of de regel dan **on** zegt. Blijft het **off**, noteer dat. Dan is de test klaar.
 
@@ -66,13 +66,27 @@ Rechterklik het icoon.
 - **Show Hints** uit: het paneel komt niet meer bij het vasthouden van toetsen. Zet het daarna weer aan.
 - **Quit** sluit Holdhint. Het icoon is dan weg.
 
-## 8. Klaar
+## 8. Windows-toets die bleef plakken
+
+Dit is de fout uit 1.2.0. Stop eerst de oude Holdhint (rechterklik, **Quit**) en installeer daarna 1.2.1. Anders blijft het oude programma draaien.
+
+1. Houd alleen de **Windows-toets** vast tot het paneel er is. Houd hem nog een paar seconden vast, ook met herhaling. Laat los. Het paneel gaat weg. Het Start-menu blijft dicht.
+2. Doe dat nog vier keer achter elkaar. Elke keer het paneel, en elke keer weg bij loslaten.
+3. Houd daarna alleen de Windows-toets weer vast. Je krijgt het Windows-paneel, niet een leeg scherm.
+4. Laat los. Houd alleen **Alt** vast. Het paneel is Alt, niet Alt+Win. Zelfde controle met alleen **Ctrl** en alleen **Shift**.
+5. Houd de Windows-toets vast tot het paneel er is. Druk op **Escape**. Laat los. Houd daarna alleen de Windows-toets vast: weer het Windows-paneel. Herhaal die stap met een klik in plaats van Escape.
+6. Tik de Windows-toets kort aan. Het Start-menu gaat open. Sluit het.
+7. Houd de Windows-toets vast tot het paneel er is, en druk op **E**. Verkenner gaat open. Het Start-menu gaat niet óók open. Het paneel is weg.
+8. Als een letter daarna toch een Windows-sneltoets doet (E opent Verkenner terwijl je de Windows-toets niet vasthoudt): tik de Windows-toets één keer kort. Daarna hoort een gewone letter weer een letter te zijn.
+
+## 9. Klaar
 
 Als dit klopt, is de test geslaagd. Meld kort wat er afweek, vooral:
 
 - stond de tekst rechtop
 - ging het paneel weg toen je de toetsen losliet
 - ging het Start-menu open of dicht bij een lange Windows-toets
+- na dat paneel: toont alleen Alt het Alt-paneel, niet Alt+Win
 - stond er **keyboard hook on**
 
 Je hoeft niets te publiceren en niets te pushen.

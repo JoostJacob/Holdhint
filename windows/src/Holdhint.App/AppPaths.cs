@@ -24,7 +24,7 @@ internal static class AppVersion
         get
         {
             var version = typeof(AppVersion).Assembly.GetName().Version;
-            return version == null ? "1.2.0" : version.Major + "." + version.Minor + "." + version.Build;
+            return version == null ? "1.2.1" : version.Major + "." + version.Minor + "." + version.Build;
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Holdhint;
 internal sealed class AppHost : ApplicationContext
 {
     readonly HintEngine _engine = new();
+    readonly ModifierTracker _keys = new();
+    readonly WinReleaseGate _winGate = new();
     readonly SettingsStore _settings;
     readonly MessageWindow _message = new();
     readonly OverlayWindow _overlay = new();
@@ -29,7 +31,6 @@ internal sealed class AppHost : ApplicationContext
     DateTime _shownAt;
     bool _shown;
     bool _sampleActive;
-    bool _winLatch;
     bool _hookOk;
     bool _shuttingDown;
     int _view;
@@ -52,8 +53,9 @@ internal sealed class AppHost : ApplicationContext
         _overlay.Create();
         _overlay.DisplayChanged += () => { if (_shown) PaintCurrent(); };
         _overlay.SessionEnding += Shutdown;
+        _overlay.Closed += OnOverlayClosed;
         _message.Keys += OnKeys;
-        _message.Mouse += () => Dismiss(new PanelGuard.Signal.Click(ModifierState.Read()));
+        _message.Mouse += () => Dismiss(new PanelGuard.Signal.Click(ModifierSet.None));
         _message.Front += OnFront;
         _message.Reload += OnReloadPosted;
         _message.Uia += OnUia;
@@ -112,28 +114,63 @@ internal sealed class AppHost : ApplicationContext
 
     void OnKeys()
     {
-        foreach (var (vk, up) in InputHooks.Drain())
+        var events = InputHooks.Drain();
+        var queuedLeft = 0;
+        var queuedRight = 0;
+        foreach (var ev in events)
         {
-            if (VirtualKeys.IsModifier(vk))
+            if (!ev.Swallowed || !ev.Up) continue;
+            if (ev.Vk == VirtualKeys.LeftWin) queuedLeft++;
+            else if (ev.Vk == VirtualKeys.RightWin) queuedRight++;
+        }
+
+        // The counter also includes releases the queue had to drop. Those are newer
+        // than the events still queued, so they are applied after this batch.
+        var (left, right) = InputHooks.TakeSwallowedWinUps();
+        var extraLeft = Math.Max(0, left - queuedLeft);
+        var extraRight = Math.Max(0, right - queuedRight);
+        var dirty = false;
+
+        foreach (var ev in events)
+        {
+            if (VirtualKeys.IsModifier(ev.Vk))
             {
-                OnModifiers();
+                _keys.Observe(ev.Vk, ev.Up, ev.Swallowed);
+                dirty = true;
                 continue;
             }
 
-            if (up) continue;
-            if (vk == VirtualKeys.Escape)
+            if (dirty)
             {
-                Dismiss(new PanelGuard.Signal.EscapeKey(ModifierState.Read()));
+                PublishModifiers();
+                dirty = false;
+            }
+
+            if (ev.Up) continue;
+            if (ev.Vk == VirtualKeys.Escape)
+            {
+                Dismiss(new PanelGuard.Signal.EscapeKey(ModifierSet.None));
                 continue;
             }
 
             if (_sampleActive) EndSample();
             if (_settings.HintsEnabled) Apply(_engine.NonModifierDown());
         }
+
+        // A release the queue dropped is newer than every event above.
+        if (extraLeft + extraRight > 0)
+        {
+            Log.Info("Swallowed Windows-key release cleared (" + extraLeft + " left, " + extraRight + " right).");
+            _keys.NoteSwallowedWinUps(extraLeft, extraRight);
+            dirty = true;
+        }
+
+        if (dirty) PublishModifiers();
     }
 
-    void OnModifiers()
+    void PublishModifiers()
     {
+        var set = _keys.Resync(ModifierState.ReadReading());
         if (!_settings.HintsEnabled)
         {
             if (_sampleActive) UpdateSwallow();
@@ -141,7 +178,23 @@ internal sealed class AppHost : ApplicationContext
             return;
         }
 
-        Apply(_engine.ModifiersChanged(ModifierState.Read()));
+        Apply(_engine.ModifiersChanged(set));
+    }
+
+    /// <summary>
+    /// One GetAsyncKeyState reading per modifier, left and right Windows keys apart.
+    /// A swallowed release counted since the last take stays up even when that reading is still down.
+    /// </summary>
+    ModifierSet CaptureModifiers()
+    {
+        var (left, right) = InputHooks.TakeSwallowedWinUps();
+        if (left + right > 0)
+        {
+            Log.Info("Swallowed Windows-key release cleared (" + left + " left, " + right + " right).");
+            _keys.NoteSwallowedWinUps(left, right);
+        }
+
+        return _keys.Resync(ModifierState.ReadReading());
     }
 
     void OnFront(IntPtr hwnd)
@@ -157,14 +210,14 @@ internal sealed class AppHost : ApplicationContext
         _front = app;
         _cacheRows = null;
         _cachePid = -1;
-        Dismiss(new PanelGuard.Signal.AppSwitch(ModifierState.Read()));
+        Dismiss(new PanelGuard.Signal.AppSwitch(ModifierSet.None));
     }
 
     void OnPoll(object? sender, EventArgs e)
     {
         try
         {
-            var polled = ModifierState.Read();
+            var polled = CaptureModifiers();
             if (!_settings.HintsEnabled)
             {
                 if (_sampleActive)
@@ -377,6 +430,9 @@ internal sealed class AppHost : ApplicationContext
         if (!_sampleActive) return;
         _sampleActive = false;
         _sampleTimer.Stop();
+        var set = CaptureModifiers();
+        if (_engine.Phase != HoldSession.Phase.Idle && _engine.Held != set)
+            Apply(_engine.ModifiersChanged(set));
         if (_engine.Phase != HoldSession.Phase.Showing) HideOverlay();
         else UpdateSwallow();
     }
@@ -384,10 +440,28 @@ internal sealed class AppHost : ApplicationContext
     void Dismiss(PanelGuard.Signal signal)
     {
         if (_sampleActive) EndSample();
+        // Every close path (click, Escape, app switch, timeout, the overlay's close message)
+        // rebases first, so a stuck Windows key is not stored as still held.
+        var live = CaptureModifiers();
+        signal = signal switch
+        {
+            PanelGuard.Signal.Click => new PanelGuard.Signal.Click(live),
+            PanelGuard.Signal.EscapeKey => new PanelGuard.Signal.EscapeKey(live),
+            PanelGuard.Signal.AppSwitch => new PanelGuard.Signal.AppSwitch(live),
+            PanelGuard.Signal.Poll poll => new PanelGuard.Signal.Poll(live, poll.VisibleFor),
+            _ => signal,
+        };
         if (_settings.HintsEnabled || _engine.Phase is HoldSession.Phase.Waiting or HoldSession.Phase.Showing)
             Apply(_engine.Guard(signal));
         else
             UpdateSwallow();
+    }
+
+    void OnOverlayClosed()
+    {
+        if (_shuttingDown) return;
+        Dismiss(new PanelGuard.Signal.Click(ModifierSet.None));
+        if (_shown) HideOverlay();
     }
 
     void Quiet()
@@ -408,16 +482,15 @@ internal sealed class AppHost : ApplicationContext
 
     void UpdateSwallow()
     {
-        var winDown = (ModifierState.Read() & ModifierSet.Win) != 0;
-        if (!winDown) _winLatch = false;
         var showingWin = !_sampleActive
             && _shown
             && _engine.Phase == HoldSession.Phase.Showing
             && (_engine.Held & ModifierSet.Win) != 0;
-        if (showingWin) _winLatch = true;
-        // Keep swallowing the Windows-key release after a letter key hides the panel,
-        // until that Windows key itself is up. Otherwise Win+E opens Explorer and then Start.
-        InputHooks.SetSwallowWinUp(_winLatch && winDown);
+        // Held comes from the reconciled tracker, not from GetAsyncKeyState. After a
+        // swallowed release that bit stays down, and using it here would swallow every
+        // later Windows-key release too.
+        _winGate.Note(showingWin, (_keys.Current & ModifierSet.Win) != 0);
+        InputHooks.SetSwallowWinUp(_winGate.Armed);
     }
 
     double ShownFor() => _shown ? (DateTime.UtcNow - _shownAt).TotalSeconds : 0;

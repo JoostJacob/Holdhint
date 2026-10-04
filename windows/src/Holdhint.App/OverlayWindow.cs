@@ -55,6 +55,7 @@ internal sealed class OverlayWindow : NativeWindow
     public bool IsShown { get; private set; }
     public event Action? DisplayChanged;
     public event Action? SessionEnding;
+    public event Action? Closed;
 
     public void Create()
     {
@@ -121,6 +122,16 @@ internal sealed class OverlayWindow : NativeWindow
             return;
         }
 
+        // No caption and no close button. A system close (Alt+F4 if this window
+        // ever receives it, or SC_CLOSE) still has to drop the modifier state.
+        if (m.Msg == Messages.WmClose || IsCloseCommand(m))
+        {
+            HidePanel();
+            Closed?.Invoke();
+            m.Result = IntPtr.Zero;
+            return;
+        }
+
         if (m.Msg == Messages.WmQueryEndSession)
         {
             m.Result = (IntPtr)1;
@@ -137,6 +148,13 @@ internal sealed class OverlayWindow : NativeWindow
             DisplayChanged?.Invoke();
 
         base.WndProc(ref m);
+    }
+
+    static bool IsCloseCommand(Message m)
+    {
+        if (m.Msg != Messages.WmSysCommand) return false;
+        var command = unchecked((int)m.WParam.ToInt64()) & 0xFFF0;
+        return command == Messages.ScClose;
     }
 
     void ApplyExStyle()

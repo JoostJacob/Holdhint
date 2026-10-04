@@ -26,11 +26,14 @@ internal static class Messages
     public const int Reload = 0x8004;
     public const int Uia = 0x8005;
     public const int Quit = 0x8006;
+    public const int WmClose = 0x0010;
     public const int WmQueryEndSession = 0x0011;
     public const int WmEndSession = 0x0016;
     public const int WmMouseActivate = 0x0021;
+    public const int WmSysCommand = 0x0112;
     public const int WmDisplayChange = 0x007E;
     public const int MaNoActivate = 3;
+    public const int ScClose = 0xF060;
 }
 
 [UnmanagedFunctionPointer(CallingConvention.Winapi)]
