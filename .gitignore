@@ -1,0 +1,5 @@
+.build/
+Holdhint.app/
+.DS_Store
+*.xcuserstate
+xcuserdata/

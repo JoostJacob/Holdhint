@@ -1,0 +1,429 @@
+{
+  "delaySeconds": 0.5,
+  "shortcuts": [
+    {
+      "modifiers": ["command"],
+      "key": "space",
+      "title": "Show or hide Spotlight"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "space",
+      "title": "Search in a Finder window"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "tab",
+      "title": "Switch to the next app"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "tab",
+      "title": "Switch to the previous app"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "backtick",
+      "title": "Next window of this app",
+      "note": "The ` key at the top left, beside 1."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "backtick",
+      "title": "Previous window of this app",
+      "note": "The ` key at the top left, beside 1."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "q",
+      "title": "Quit this app"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "h",
+      "title": "Hide this app"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "h",
+      "title": "Hide every other app"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "m",
+      "title": "Minimize the front window"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "m",
+      "title": "Minimize every window of this app"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "w",
+      "title": "Close the front window"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "w",
+      "title": "Close every window of this app"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "escape",
+      "title": "Force quit an app"
+    },
+    {
+      "modifiers": ["command", "control"],
+      "key": "q",
+      "title": "Lock the screen"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "q",
+      "title": "Log out",
+      "note": "macOS asks you to confirm."
+    },
+    {
+      "modifiers": ["command", "option", "shift"],
+      "key": "q",
+      "title": "Log out without asking"
+    },
+    {
+      "modifiers": ["control"],
+      "key": "up",
+      "title": "Mission Control"
+    },
+    {
+      "modifiers": ["control"],
+      "key": "down",
+      "title": "Show every window of this app"
+    },
+    {
+      "modifiers": ["control"],
+      "key": "left",
+      "title": "Move to the space on the left"
+    },
+    {
+      "modifiers": ["control"],
+      "key": "right",
+      "title": "Move to the space on the right"
+    },
+    {
+      "modifiers": ["command", "control"],
+      "key": "f",
+      "title": "Enter or leave full screen"
+    },
+    {
+      "modifiers": ["command", "control"],
+      "key": "space",
+      "title": "Emoji and symbols"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "d",
+      "title": "Show or hide the Dock"
+    },
+    {
+      "modifiers": ["command"],
+      "key": ",",
+      "title": "Open Settings"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "3",
+      "title": "Capture the full screen to a file",
+      "note": "The file is saved on the Desktop."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "4",
+      "title": "Capture a selection to a file",
+      "note": "Saved on the Desktop. Press Space, then click a window, to capture that window."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "5",
+      "title": "Open the screenshot and recording tools"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "6",
+      "title": "Capture the Touch Bar to a file",
+      "note": "Older Macs that have a Touch Bar. Saved on the Desktop."
+    },
+    {
+      "modifiers": ["command", "control", "shift"],
+      "key": "3",
+      "title": "Capture the full screen to the clipboard"
+    },
+    {
+      "modifiers": ["command", "control", "shift"],
+      "key": "4",
+      "title": "Capture a selection to the clipboard",
+      "note": "Press Space, then click a window, to capture that window."
+    },
+    {
+      "modifiers": ["command", "control", "shift"],
+      "key": "6",
+      "title": "Capture the Touch Bar to the clipboard",
+      "note": "Older Macs that have a Touch Bar."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "c",
+      "title": "Copy"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "x",
+      "title": "Cut"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "v",
+      "title": "Paste"
+    },
+    {
+      "modifiers": ["command", "option", "shift"],
+      "key": "v",
+      "title": "Paste and match the surrounding style"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "z",
+      "title": "Undo"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "z",
+      "title": "Redo"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "y",
+      "title": "Redo",
+      "note": "Some apps use this instead of Command-Shift-Z."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "a",
+      "title": "Select all"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "f",
+      "title": "Find"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "g",
+      "title": "Find the next match"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "g",
+      "title": "Find the previous match",
+      "note": "In Finder this opens Go to Folder."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "s",
+      "title": "Save"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "o",
+      "title": "Open"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "p",
+      "title": "Print"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "n",
+      "title": "New window or document"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "t",
+      "title": "New tab"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "t",
+      "title": "Reopen the last closed tab",
+      "note": "Safari and many other apps."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "b",
+      "title": "Bold"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "i",
+      "title": "Italic",
+      "note": "In Finder this is Get Info."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "u",
+      "title": "Underline"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "/",
+      "title": "Open the Help menu"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "-",
+      "title": "Zoom out",
+      "note": "Browsers and many other apps."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "=",
+      "title": "Zoom in",
+      "note": "Browsers and many other apps."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "left",
+      "title": "Move to the start of the line"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "right",
+      "title": "Move to the end of the line"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "up",
+      "title": "Move to the start of the document",
+      "note": "In Finder this opens the enclosing folder."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "down",
+      "title": "Move to the end of the document",
+      "note": "In Finder this opens the selection."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "left",
+      "title": "Select to the start of the line"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "right",
+      "title": "Select to the end of the line"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "up",
+      "title": "Select to the start of the document"
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "down",
+      "title": "Select to the end of the document"
+    },
+    {
+      "modifiers": ["option"],
+      "key": "left",
+      "title": "Move one word left"
+    },
+    {
+      "modifiers": ["option"],
+      "key": "right",
+      "title": "Move one word right"
+    },
+    {
+      "modifiers": ["option"],
+      "key": "up",
+      "title": "Move to the previous paragraph"
+    },
+    {
+      "modifiers": ["option"],
+      "key": "down",
+      "title": "Move to the next paragraph"
+    },
+    {
+      "modifiers": ["option", "shift"],
+      "key": "left",
+      "title": "Select the previous word"
+    },
+    {
+      "modifiers": ["option", "shift"],
+      "key": "right",
+      "title": "Select the next word"
+    },
+    {
+      "modifiers": ["option"],
+      "key": "delete",
+      "title": "Delete the previous word"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "delete",
+      "title": "Delete to the start of the line",
+      "note": "In Finder this moves the selection to the Trash."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "n",
+      "title": "New folder",
+      "note": "Finder. Some browsers use this for a private window."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": "delete",
+      "title": "Empty Trash",
+      "note": "Finder. macOS asks you to confirm."
+    },
+    {
+      "modifiers": ["command", "option", "shift"],
+      "key": "delete",
+      "title": "Empty Trash without asking",
+      "note": "Finder."
+    },
+    {
+      "modifiers": ["command", "shift"],
+      "key": ".",
+      "title": "Show or hide hidden files",
+      "note": "Finder."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "[",
+      "title": "Back"
+    },
+    {
+      "modifiers": ["command"],
+      "key": "]",
+      "title": "Forward"
+    },
+    {
+      "modifiers": ["command", "option"],
+      "key": "v",
+      "title": "Move the copied item here",
+      "note": "Finder, after you have copied a file."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "e",
+      "title": "Eject the selected disk",
+      "note": "Finder."
+    },
+    {
+      "modifiers": ["command"],
+      "key": "d",
+      "title": "Duplicate",
+      "note": "Finder. In many browsers this bookmarks the page."
+    }
+  ]
+}
